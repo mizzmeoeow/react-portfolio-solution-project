@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import axios from 'axios';
 
 import PortfolioItem from "./portfolio-item";
 
@@ -9,17 +10,11 @@ export default class PortfolioContainer extends Component {
         this.state = {
             pageTitle: "Welcome to my portfolio",
             isLoading: false,
-            data: [
-                {title: "Quip", category: "eCommerce"}, 
-                {title: "Eventbrite", category: "Scheduling"}, 
-                {title: "Ministry Safe", category: "Enterprise"},
-                {title: "SwingAway", category: "eCommerce"}
-            ]
+            data: []
         };
 // button handler
         // this.handlePageTitleUpdate = this.handlePageTitleUpdate.bind(this.handlePageTitleUpdate)
         this.handleFilter = this.handleFilter.bind(this);
-
     }
 
     handleFilter(filter) {
@@ -30,9 +25,25 @@ export default class PortfolioContainer extends Component {
       });
     }
 
+    getPortfolioItems() {
+        axios
+          .get('https://shannameow.devcamp.space/portfolio/portfolio_items')
+          .then(response => {
+          // handle success
+            this.setState({
+                data: response.data.portfolio_items
+            });
+          })
+          .catch(error => {
+          // handle error
+            console.log(error);
+          });
+     }
+
     portfolioItems() {
         return this.state.data.map(item => {
-            return <PortfolioItem title={item.title} />;
+            console.log("portfolio item", item);//view the data for each object
+            return <PortfolioItem key={item.id} item={item}/>;
         });
     }
 
@@ -42,6 +53,9 @@ export default class PortfolioContainer extends Component {
     //         pageTitle: "Something Else"
     //     });
     // }
+    componentDidMount() {
+        this.getPortfolioItems();
+    }
 
     render() {
         if (this.state.isLoading) {
@@ -49,19 +63,13 @@ export default class PortfolioContainer extends Component {
         }
 
         return (
-            <div>
-                <h2>{this.state.pageTitle}</h2>
-
-                <button onClick={() => this.handleFilter('eCommerce')}>eCommerce</button>
-                <button onClick={() => this.handleFilter('Scheduling')}>Scheduling</button>
-                <button onClick={() => this.handleFilter('Enterprise')}>Enterprise</button>
+                <div className="portfolio-items-wrapper">
+                  <button className="btn" onClick={() => this.handleFilter('eCommerce')}>eCommerce</button>
+                  <button className="btn" onClick={() => this.handleFilter('Scheduling')}>Scheduling</button>
+                  <button className="btn" onClick={() => this.handleFilter('Enterprise')}>Enterprise</button>
 
                 {this.portfolioItems()}
-                 {/* button handler */}
-                 {/* <hr />
-
-                <button onClick={this.handlePageTitleUpdate}>Change Title</button>  */}
-            </div>
+                </div>
         );
     }
 }
